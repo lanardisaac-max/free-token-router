@@ -1,0 +1,183 @@
+{
+  "skill_name": "free-token-router-setup",
+  "description": "Auto-integrate free token router into Claude projects",
+  "evals": [
+    {
+      "id": 1,
+      "name": "nodejs_new_anthropic_client",
+      "description": "Update basic Node.js Anthropic client initialization",
+      "input_code": "const Anthropic = require('@anthropic-ai/sdk').default;\nconst client = new Anthropic({\n  apiKey: process.env.ANTHROPIC_API_KEY,\n})",
+      "expected_output": "const Anthropic = require('@anthropic-ai/sdk').default;\nconst client = new Anthropic({\n  apiKey: process.env.ANTHROPIC_API_KEY,\n  baseURL: process.env.LLM_ROUTER_BASE_URL || 'https://api.anthropic.com/v1',\n})",
+      "assertions": [
+        {
+          "name": "contains_baseURL",
+          "check": "output contains 'baseURL: process.env.LLM_ROUTER_BASE_URL'"
+        },
+        {
+          "name": "has_fallback",
+          "check": "output contains \"|| 'https://api.anthropic.com/v1'\""
+        },
+        {
+          "name": "preserves_apiKey",
+          "check": "output contains 'apiKey: process.env.ANTHROPIC_API_KEY'"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "python_anthropic_client",
+      "description": "Update Python Anthropic client initialization",
+      "input_code": "import anthropic\nimport os\n\nclient = anthropic.Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))",
+      "expected_output": "import anthropic\nimport os\n\nclient = anthropic.Anthropic(\n    api_key=os.getenv('ANTHROPIC_API_KEY'),\n    base_url=os.getenv('LLM_ROUTER_BASE_URL', 'https://api.anthropic.com/v1')\n)",
+      "assertions": [
+        {
+          "name": "contains_base_url",
+          "check": "output contains 'base_url=os.getenv'"
+        },
+        {
+          "name": "has_fallback",
+          "check": "output contains \"'https://api.anthropic.com/v1'\""
+        },
+        {
+          "name": "preserves_api_key",
+          "check": "output contains \"os.getenv('ANTHROPIC_API_KEY')\""
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "env_file_creation",
+      "description": "Create .env file with router URL",
+      "input_files": [],
+      "expected_env_content": "# Free Token Router\nLLM_ROUTER_BASE_URL=https://free-token-router-production.up.railway.app/v1",
+      "assertions": [
+        {
+          "name": ".env_created",
+          "check": ".env file exists"
+        },
+        {
+          "name": "router_url_present",
+          "check": ".env contains LLM_ROUTER_BASE_URL"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "git_commit_created",
+      "description": "Verify git commit is created with proper message",
+      "expected_commit_message": "feat: integrate free token router",
+      "assertions": [
+        {
+          "name": "commit_exists",
+          "check": "git log shows new commit"
+        },
+        {
+          "name": "commit_message_correct",
+          "check": "commit message contains 'integrate free token router'"
+        },
+        {
+          "name": "branch_created",
+          "check": "feat/free-token-router branch exists"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "multiple_files_detection",
+      "description": "Find and update multiple Anthropic client files",
+      "input_files": [
+        "src/anthropic.ts",
+        "src/services/llm.js",
+        "utils/api.ts"
+      ],
+      "expected_files_updated": 2,
+      "assertions": [
+        {
+          "name": "finds_multiple_files",
+          "check": "detects both anthropic.ts and llm.js"
+        },
+        {
+          "name": "updates_both",
+          "check": "both files have baseURL parameter added"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "project_type_detection_nodejs",
+      "description": "Correctly detect Node.js project",
+      "setup": "create package.json in project root",
+      "expected_detection": "nodejs",
+      "assertions": [
+        {
+          "name": "detects_package_json",
+          "check": "recognizes Node.js from package.json"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "project_type_detection_python",
+      "description": "Correctly detect Python project",
+      "setup": "create requirements.txt in project root",
+      "expected_detection": "python",
+      "assertions": [
+        {
+          "name": "detects_requirements",
+          "check": "recognizes Python from requirements.txt"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "dry_run_mode",
+      "description": "Preview changes without committing",
+      "options": "--dry-run",
+      "expected_behavior": "shows changes but doesn't commit",
+      "assertions": [
+        {
+          "name": "no_commit_created",
+          "check": "git status shows no new commits"
+        },
+        {
+          "name": "changes_shown",
+          "check": "output shows what would be changed"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "custom_router_url",
+      "description": "Use custom router URL instead of default",
+      "options": "--router-url https://custom-router.app/v1",
+      "expected_url": "https://custom-router.app/v1",
+      "assertions": [
+        {
+          "name": "custom_url_in_env",
+          "check": ".env contains custom URL"
+        },
+        {
+          "name": "custom_url_in_code",
+          "check": "code contains custom URL in fallback"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "idempotent_run",
+      "description": "Skill can run multiple times without breaking",
+      "run_count": 2,
+      "expected_behavior": "second run detects already-integrated and skips or updates gracefully",
+      "assertions": [
+        {
+          "name": "first_run_succeeds",
+          "check": "initial integration succeeds"
+        },
+        {
+          "name": "second_run_safe",
+          "check": "running again doesn't break anything"
+        }
+      ]
+    }
+  ]
+}
