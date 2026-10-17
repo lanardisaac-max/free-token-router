@@ -11,11 +11,12 @@ The existing router candidate is text-only Groq/optional OpenRouter code. Its 43
 
 ## Boundaries
 
-- This preparation changes only this document and HANDOFF_TEMPLATE.md on the existing candidate branch. No product code, runtime schema, live configuration, account, credential, deployment, scheduler or unrelated project is changed.
+- Repository preparation changes only this document and HANDOFF_TEMPLATE.md on the existing candidate branch. Owner-authorized additive F: folder/receipt preparation is recorded below. No product code, runtime schema, live configuration, account, credential, deployment, scheduler or unrelated project is changed.
 - Claude/Claude Code/Anthropic remain prohibited; Antigravity remains retired. Model provenance must be explicit, including gateway upstreams and background title/small/review/subagent models. Unknown identity is not approval.
 - Existing source, build, transport and effective-tool isolation NO-GO remains binding. Enabled-provider metadata, model picker entries, tool lists, binary version strings or a hash alone cannot certify complete effective availability or containment. Do not launch a client, local inference server or infrastructure to work around that gate.
 - Native policy requires qualified F:-backed model files, caches, temp, development state and artifacts. No C:/D: installation/test/download workaround. D: remains Command Center exclusive. Read-only inventory is permitted; the existing storage coordinator is the sole storage executor.
 - The owner's 2026-10-17 instruction, "You are authorized to use F: for storage", approves that destination. It does not establish filesystem health, verified recovery or runtime admission, and does not authorize formatting, destructive repair or a duplicate storage executor.
+- At17:53EDT the owner subsequently stated F: was verified good, needed no repair, files had transferred successfully, and explicitly authorized immediate use. This newer instruction permits additive fallback storage preparation now, superseding the earlier hold on those writes. Preserve the historical machine observation separately; do not equate owner confirmation or successful file writes with independent filesystem/recovery or runtime certification. No repair or duplicate migration is required or authorized by this update.
 - No new credits, auto-reload, paid fallback, billing upgrade, driver update, database action, production release, broad project integration or protected action is implied. Existing normal authentication must be used; never extract/reuse an unrelated session token or service credential.
 - Apply the strict sequential gate within this task. Supporting investigation and review stay on this same task; runtime execution remains locked until its actual dependencies qualify.
 
@@ -44,7 +45,17 @@ The same-task storage helper's retained Oct17 20:49:21Z report of F: Dirty remai
 | Existing process names/IDs | Robocopy 32892 and 43364; no chkdsk in this bounded query. This does not establish copy success, verified backup or absence of other coordination. |
 | Observation method | Get-Volume metadata, bounded Win32_Process names/IDs/creation times and fsutil dirty query; command exit0; no repair, copy, installation or inference was started |
 
-No qualifying final-clean coordinator receipt, independently recoverable backup or model/cache/temp redirect receipt was established. F: is destination-authorized but remains **UNQUALIFIED** for admission because current filesystem integrity fails the gate. Do not write model files to it, repeat a broad assessment, stop existing copies or start another repair/copy process. The existing storage coordinator retains execution ownership.
+At that earlier checkpoint no qualifying final-clean coordinator, independently recoverable backup or model/cache/temp redirect receipt had been established. The owner subsequently verified F: and authorized immediate use at17:53EDT. Treat the21:46 observation as historical, not a fresh assertion overriding that instruction. Existing storage coordination retains migration/repair ownership; do not stop copies or start another repair/migration process.
+
+### Immediate F: use authorized and verified
+
+At **2026-10-17T21:54:02.1842225Z** root created or confirmed six directories: `F:\LTI-AI-Fallback` and its `models`, `cache`, `temp`, `artifacts`, `recovery` children. Directory checks found no reparse points at these paths. A new nonsecret receipt was created without overwriting any existing file and verified by exact readback; the parent also read it through Desktop Commander.
+
+- Receipt: `F:\LTI-AI-Fallback\recovery\storage-preparation-20261017T215402190Z.json`
+- SHA256: `7ac14608bbe6b7786330122ebd971457c3661394ee78eea6f64a3fa6cce9784d`
+- Folder preparation:6/6=100%; previous completion baseline UNVERIFIED, so no percentage-point change is inferred.
+- No existing files were moved/deleted, no machine-wide cache settings were changed, and no model/runtime was downloaded, installed or launched. Directory existence is not process path redirection.
+- This bounded file write/read proves current usability of the prepared path; it does not independently certify the full filesystem, backup recoverability, future integrity or DFF01–08 operational completion.
 
 ## Qualified candidate selection
 
@@ -61,7 +72,7 @@ Version DFF-ADMISSION-20261017-v1. These eight criteria define the first qualifi
 
 | ID | Required proof | Current disposition |
 | --- | --- | --- |
-| DFF01 | Existing coordinator admits exact F: volume, clean filesystem, verified recovery, peak capacity plus reserve, permissions/link behavior and all model/cache/temp paths | BLOCKED: destination authorized; direct21:46:36Z check Dirty / Full Repair Needed; qualifying recovery, clean-filesystem and path receipts missing |
+| DFF01 | Existing coordinator admits exact F: volume, clean filesystem, verified recovery, peak capacity plus reserve, permissions/link behavior and all model/cache/temp paths | PARTIAL: owner verified F good/transfers successful and authorized immediate use; six directories and exact receipt readback verified; full independent recovery, tool-specific filesystem suitability, reserve and process-path qualification remain unverified |
 | DFF02 | Exact client, inference runtime, dependencies/plugins, source/build hashes and effective tool/network/credential boundaries bound to authorized scope; independently reviewed | UNVERIFIED: file identity is only partial metadata |
 | DFF03 | Each activated cloud/local model has exact provenance/license, correct data class, usable normal authentication, renewable-free/zero-paid entitlement or local artifact proof | UNVERIFIED: no account/artifact qualified |
 | DFF04 | Real admitted client completes a synthetic approved read -> edit -> local test -> result cycle; main and auxiliary routes remain permitted | NOT RUN: no runtime admission |
@@ -80,4 +91,4 @@ When ChatGPT is unavailable, an executor can continue only a previously approved
 
 ## Exact next action
 
-Read back the existing storage coordinator's qualifying receipt when one becomes available, while continuing same-task runtime/source/account-metadata verification through permitted normal interfaces. Do not start a duplicate coordinator, install/update/download, launch inference/client tests, extract credentials or retry a denied route. If a prerequisite remains unavailable, preserve this record and report that exact gate; owner reapproval of routine verification is not required.
+Use the prepared F: recovery/artifact paths for permitted same-task evidence. Continue exact runtime/source/account-metadata verification through permitted normal interfaces, and obtain remaining storage qualification evidence through the existing coordinator without restarting a broad assessment or imposing repair as the only resolution. Model acquisition and execution still depend on exact artifact/runtime admission; do not install/update/download or launch inference/client tests to bypass that separate gate. No duplicate migration, credential extraction or denied-route retry. Owner reapproval of routine verification is not required.
