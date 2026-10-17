@@ -57,6 +57,18 @@ At **2026-10-17T21:54:02.1842225Z** root created or confirmed six directories: `
 - No existing files were moved/deleted, no machine-wide cache settings were changed, and no model/runtime was downloaded, installed or launched. Directory existence is not process path redirection.
 - This bounded file write/read proves current usability of the prepared path; it does not independently certify the full filesystem, backup recoverability, future integrity or DFF01–08 operational completion.
 
+### Owner-authorized bounded backup test during transfer
+
+At17:59EDT the owner authorized backup testing and confirmed a large backup already saved successfully with transfers continuing. The21:59:16Z process read found two existing Robocopy processes,32892 and43364, both targeting `C:\Users` -> `F:\Users_Backup`; neither was interrupted or replaced. Neither observed command specified a log file. A process listing is not progress, successful completion or a final exit-code receipt.
+
+Three known nonsecret governance files were selected before testing. At the checked destination only `.codex\AGENTS.md` was present; `CodexArtifacts\LTI-AG-Retirement-20261008\EXECUTOR-POLICY.md` and `CodexArtifacts\LTI-Operating-Standards\STRICT-SEQUENTIAL-100-GATE-ACTIVE.md` were absent. During the active transfer this is incomplete sample availability, not evidence that the entire backup failed.
+
+The10,062-byte AGENTS sample passed source/backup SHA256 comparison and an isolated restore into `F:\LTI-AI-Fallback\recovery\backup-test-20261017T215953887Z\AGENTS.sample-restored.txt`. Source and backup hashes, sizes and last-write times were unchanged before/after. All three content hashes were `13d2c6cf71bb7c548cb62b09f6992c3644fe0943dbb05ea792f1afe463a8dd18`. No existing file was overwritten, source data changed, large scan started or active transfer interrupted.
+
+- Result receipt: `F:\LTI-AI-Fallback\recovery\backup-test-20261017T215953887Z\RESULT.json`; SHA256 `f5482230c86024e14827eacb467e2d800cd92e7766bec4618cad9b0e6edf7e4f`; exact write/readback plus parent Desktop Commander read verified.
+- Selected-check completion:1/3=33.33%, with1pass and2unavailable; previous accepted baseline UNVERIFIED, no invented delta. This is not a whole-backup completion percentage.
+- Scope limit: one small governance file, restored on the same F: volume; no independent-media, full-manifest, database, encrypted-backup or boot-recovery certification. Final transfer and overall recoverability remain unverified.
+
 ## Qualified candidate selection
 
 1. Prefer actual existing Cloudflare Workers AI Free, Gemini API Free or OpenRouter free-variant accounts, only after normal authenticated entitlement and policy verification. No account is qualified merely by this list. Cloudflare has a published daily compute allowance; Gemini unpaid data restrictions exclude confidential/personal inputs; OpenRouter requires an exact approved model and upstream. Neither hidden automatic routing nor a paid variant is an eligible fallback.
@@ -72,7 +84,7 @@ Version DFF-ADMISSION-20261017-v1. These eight criteria define the first qualifi
 
 | ID | Required proof | Current disposition |
 | --- | --- | --- |
-| DFF01 | Existing coordinator admits exact F: volume, clean filesystem, verified recovery, peak capacity plus reserve, permissions/link behavior and all model/cache/temp paths | PARTIAL: owner verified F good/transfers successful and authorized immediate use; six directories and exact receipt readback verified; full independent recovery, tool-specific filesystem suitability, reserve and process-path qualification remain unverified |
+| DFF01 | Existing coordinator admits exact F: volume, clean filesystem, verified recovery, peak capacity plus reserve, permissions/link behavior and all model/cache/temp paths | PARTIAL: owner authorized immediate F use; six directories/receipt verified; one stable backup file hash-matched and restored to isolated F path; two selected files unavailable during transfer; full independent recovery, tool-specific suitability, reserve and process-path qualification remain unverified |
 | DFF02 | Exact client, inference runtime, dependencies/plugins, source/build hashes and effective tool/network/credential boundaries bound to authorized scope; independently reviewed | UNVERIFIED: file identity is only partial metadata |
 | DFF03 | Each activated cloud/local model has exact provenance/license, correct data class, usable normal authentication, renewable-free/zero-paid entitlement or local artifact proof | UNVERIFIED: no account/artifact qualified |
 | DFF04 | Real admitted client completes a synthetic approved read -> edit -> local test -> result cycle; main and auxiliary routes remain permitted | NOT RUN: no runtime admission |
