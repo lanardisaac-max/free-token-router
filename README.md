@@ -1,327 +1,78 @@
-# Free Token Router
+# Free Token Router: bounded fallback candidate
 
-**Aggregates free tier LLM APIs into a unified endpoint with intelligent routing, failover, and load balancing.**
+This repository contains an authenticated, text-only fallback API. It does not extend the ChatGPT/Codex application allowance, resume those apps automatically, or certify an autonomous coding executor. Free provider allowances are finite. Railway hosting is separate from inference pricing. Never promise uninterrupted service, unlimited tokens or guaranteed savings.
 
-Provides unlimited free tokens/month by combining:
-- ✅ Claude free tier (Anthropic)
-- ✅ OpenAI free tier credits
-- ✅ Cohere free tier
-- ✅ Intelligent failover (if one provider down, routes to next)
-- ✅ Load balancing (distributes requests across providers)
+## Release status — 2026-10-17
 
----
+The existing production service was observed online, but working authenticated inference was not verified. Its older code permitted unauthenticated requests, paid/prohibited routes and misleading health reporting. This candidate replaces those routes and is not live until its exact reviewed commit is deployed and independently verified.
 
-## 🚀 Quick Start
+| Route | Candidate status | Activation evidence required |
+| --- | --- | --- |
+| Groq Free Plan / `openai/gpt-oss-20b` | Implemented, offline tested | Secure key, actual Free Plan/no paid billing, model/license/data-policy qualification, live bounded text test |
+| OpenRouter / `openai/gpt-oss-20b:free`, Groq only | Optional, disabled | Fresh exact free endpoint/provider evidence, account/key/policy qualification; public endpoints API returned an empty list on Oct 17 |
+| OpenAI API, Anthropic/Claude, Cohere trial, Antigravity | Excluded | No activation path in this app |
 
-### 1. Deploy to Railway (2 minutes)
+`openai/gpt-oss-20b` is an open-weight model served by Groq; the router does not call OpenAI's paid API. The optional OpenRouter route pins both model and provider, disables provider fallback and sets a zero prompt/completion price ceiling. Since it selects Groq, it is not independent of a Groq infrastructure outage. Do not count it as a second proven inference provider.
 
-```bash
-# Clone this repo
-git clone <this-repo>
-cd free-token-router
+## Enforced controls
 
-# Push to Railway
-railway up
-```
+- Bearer authentication with a separately provisioned token of at least 32 characters, checked before reading request bodies. Only `/` and `/health` are public. Keys never appear in responses.
+- Fixed HTTPS endpoints; no caller-selected URLs, providers or model names. Redirects and environment proxies disabled. Unknown fields, tools, streaming, images and legacy protocols are rejected.
+- Maximum 32 KiB request, 32 messages, 1,024 output tokens and 128 KiB upstream response. Entire request deadline defaults to 15 seconds and cannot exceed 30. Groq uses the current `max_completion_tokens` parameter and fixed low reasoning. Each provider is attempted at most once; no retry loop or paid spillover.
+- One concurrent inference request per process. Default three-second interval between new requests. A second attempt for the same request can bypass that interval but still consumes the daily reservation.
+- SQLite reservations before every upstream attempt, including failed attempts: hard ceilings of 40 attempts and 40,000 conservative token-reservation units per UTC day. Output limit plus serialized UTF-8 input bytes plus 512 overhead units are reserved; these are a conservative local proxy, not measured provider billable tokens. Provider account limits remain authoritative and may be lower.
+- Durable volume required and explicitly confirmed. Missing/unwritable state fails closed. Reservations and provider cooldowns survive restart only if that volume remains intact. Deploy exactly one replica and worker; the process lock and host-local SQLite do not implement a distributed quota service. Do not delete/reset state to regain allowance.
+- Rate limits and transient failures cool the provider using bounded `Retry-After` or 60 seconds. Authentication, payment and permission errors stop the request and disable that provider for 24 hours. No raw provider errors, prompts or secrets in application logs.
+- `/health` means the process is alive. Authenticated `/ready` reports configuration/budget/cooldown eligibility only and always returns `inference_verified:false`. Neither is operational certification.
+- Legacy `/v1/messages` and `/v1/completions` return 410 after authentication. Automatic cross-project integration scripts exit without work; old mutation workflows are removed. No hosted Actions workflow is added.
 
-Or click: **Deploy on Railway** button (will add after GitHub setup)
+## Contract
 
-### 2. Configure Environment Variables
-
-In Railway dashboard, add:
-
-```
-ANTHROPIC_API_KEY=sk-ant-xxxxx (or leave empty if not available)
-OPENAI_API_KEY=sk-xxxxx (or leave empty)
-COHERE_API_KEY=xxxxx (or leave empty)
-PORT=8000
-```
-
-At least ONE API key required. More keys = more redundancy.
-
-### 3. Get Your Endpoint
-
-Railway will assign you a URL like:
-```
-https://free-token-router-production.up.railway.app
-```
-
-### 4. Use in Your Projects
-
-Replace your LLM API calls with:
-
-```python
-# Before
-client = anthropic.Anthropic(api_key="sk-ant-xxxxx")
-
-# After
-client = anthropic.Anthropic(
-    api_key=os.getenv("ANTHROPIC_API_KEY"),  # Your actual API key (if using Claude)
-    base_url="https://free-token-router-production.up.railway.app/v1"
-)
-```
-
-Or for any project using OpenAI-compatible format:
-
-```python
-import openai
-
-openai.api_base = "https://free-token-router-production.up.railway.app/v1"
-openai.api_key = os.getenv("ANTHROPIC_API_KEY")  # Any valid key works as pass-through
-```
-
----
-
-## 📊 How It Works
-
-### Request Flow
-
-```
-Your App
-   ↓
-[Free Token Router]
-   ↓
-   ├→ Check Claude API key available? → Route to Claude (Priority 1)
-   ├→ Check OpenAI key available? → Route to OpenAI (Priority 2)
-   └→ Check Cohere key available? → Route to Cohere (Priority 3)
-   ↓
-Provider Responds
-   ↓
-Your App
-```
-
-### Load Balancing
-
-Router tracks usage per provider and distributes load:
-
-```
-Provider A: 50 requests  ← Next request routes here (least used)
-Provider B: 60 requests
-Provider C: 75 requests
-```
-
-### Failover
-
-If a provider fails (API down or rate limited):
-
-```
-Request to Claude → FAILS
-Try OpenAI → SUCCEEDS ✓
-Response returned
-```
-
----
-
-## 🔌 API Endpoints
-
-### Chat Completions (Claude-compatible)
-
-```bash
-curl -X POST https://free-token-router.up.railway.app/v1/messages \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "claude-3-5-sonnet-20241022",
-    "max_tokens": 1024,
-    "messages": [
-      {"role": "user", "content": "Hello!"}
-    ]
-  }'
-```
-
-### Text Completions
-
-```bash
-curl -X POST https://free-token-router.up.railway.app/v1/completions \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "gpt-4",
-    "prompt": "Hello!",
-    "max_tokens": 256
-  }'
-```
-
-### List Available Models
-
-```bash
-curl https://free-token-router.up.railway.app/v1/models
-```
-
-### Health Check
-
-```bash
-curl https://free-token-router.up.railway.app/health
-```
-
-Returns:
+`POST /v1/chat/completions`, with `Authorization: Bearer <router-token>`:
 
 ```json
-{
-  "status": "healthy",
-  "available_providers": ["claude", "openai", "cohere"],
-  "usage_stats": {
-    "claude": 45,
-    "openai": 32,
-    "cohere": 18
-  }
-}
+{"model":"free-text","messages":[{"role":"user","content":"A nonsensitive text request"}],"max_tokens":128,"stream":false}
 ```
 
----
+Only `model`, `messages`, `max_tokens`, `stream:false`, and optional `temperature` are accepted. Messages use nonempty string content and `system`, `user`, or `assistant` roles. The normalized reply has `object:chat.completion`, `model:free-text` and one assistant text choice. Unsupported contracts fail explicitly rather than silently losing tool/system information. Application errors contain a local request ID and sanitized code; 429/503 include `Retry-After`. Retain unfinished work locally; do not treat timeouts as a successful completion or blindly replay external side effects.
 
-## 📈 Token Estimation
+This is not a Responses API or tool-calling implementation. Do not point Codex/Work/production tools at it and claim compatibility. A separate authorized client adapter and end-to-end tool-call/reply test would be required. Human text use and automated coding acceptance are separate gates.
 
-### Monthly Free Tokens
+## Verify locally
 
-| Provider | Free Tier | Our Routing |
-|----------|-----------|------------|
-| Claude | ~100K/month | ✅ Included |
-| OpenAI | $5 trial credits | ✅ Included |
-| Cohere | 1000 requests/day | ✅ Included |
-| **Total** | **~500K+/month** | **✅ FREE** |
+In an authorized isolated cloud checkout, using Python 3.11+:
 
----
-
-## 🔐 Security
-
-### What's Transmitted
-
-- ✅ Your API keys stored **only in Railway environment** (not in code)
-- ✅ Requests routed securely via HTTPS
-- ✅ No data logged or stored
-
-### Best Practices
-
-1. Use different API keys for different providers
-2. Rotate keys quarterly
-3. Monitor `/health` endpoint for abuse
-4. Rate limit on your app side (this router doesn't rate limit)
-
----
-
-## 🛠️ Integration with Your Projects
-
-### For Claude SDK Projects (FMC, XOLVARA, CFP)
-
-Update `.env`:
-
-```
-ANTHROPIC_API_KEY=sk-ant-xxxxx
-ANTHROPIC_API_BASE=https://free-token-router-production.up.railway.app/v1
+```sh
+python -m pip install -r requirements-dev.txt
+python -m pytest -q
 ```
 
-Update code:
+All tests use HTTPX MockTransport and synthetic keys. They make no paid or live inference requests. Do not run installations on an unqualified native disk. No test result is proof of a live free account, working key, deployed commit, or billing configuration.
 
-```python
-import anthropic
+## Safe release and rollback
 
-client = anthropic.Anthropic(
-    api_key=os.getenv("ANTHROPIC_API_KEY"),
-    base_url=os.getenv("ANTHROPIC_API_BASE", "https://api.anthropic.com/v1")
-)
-```
+1. Independently review the exact candidate commit and full test result. Preserve the current deployment/source identity and rollback option. Do not merge the unrelated shared-memory pointer draft as a prerequisite.
+2. Through an already authorized normal provider session, verify Groq Free Plan, zero paid billing exposure, applicable Apache 2.0 model license and account/data policy. Provision a scoped provider key into the secret store without printing it; create a separate strong router token there. Do not reuse unrelated service tokens or enable auto-reload. If no authorized session/key is available, record that exact blocker and keep this candidate undeployed.
+3. Verify an existing durable volume and cost authorization, then configure `.env.example` names with real secrets only in the secret store. `*_CONFIRMED=true` are operator assertions, not automatic account verification. Old `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `COHERE_API_KEY` and `LLM_ROUTER_BASE_URL` do not enable this code. Remove unused keys separately through an authorized secret-management operation after consumer inventory; never expose their values.
+4. Deploy the reviewed commit to the existing router service, one replica/worker. Do not deploy a disabled replacement and call it available. No broad integration/production client changes are part of this release.
+5. Verify unauthenticated inference is rejected, liveness works, readiness is authenticated, and a single nonsensitive authenticated request returns the expected text/schema within the deadline. Verify the actual provider/account usage remains free. Record timestamp, exact commit/deployment, request ID, model and outcome, never key/prompt/private response content.
+6. Verify persistent caps across a controlled restart and quota-failure behavior in an isolated test environment. Qualify a separate client only if its protocol and isolation gates are authorized. If release fails, stop routing new work; use the retained deployment/source rollback only within applicable authority. Never restore the old unauthenticated/prohibited routes merely to make health green.
 
-### For OpenAI SDK Projects
+## Consumption and recovery policy
 
-```python
-import openai
+Keep ChatGPT as PM. Routine checks should use ordinary reasoning where configurable; reserve expensive reasoning and parallel workers for changed, difficult work. Reuse exact-head passing evidence, fetch small deltas and bounded logs, stop unchanged checks early, and never rerun an unresolved denied route. Preserve existing schedules unless separately changed by the owner. Prompt policy is advisory enforcement by the executor, not a platform-wide token ceiling.
 
-openai.base_url = os.getenv("OPENAI_API_BASE", "https://api.openai.com/v1")
-openai.api_key = os.getenv("OPENAI_API_KEY")
-```
+When actual remaining allowance is visible through an authorized interface, checkpoint at 20%; at 10%, defer nonessential investigation; at 5%, stop noncritical fan-out and preserve the final handoff. If remaining usage cannot be read, mark it unknown, keep work bounded, and do not invent a balance. No automatic credit purchase or paid fallback. These thresholds are an operating policy, not an installed platform alert or global kill switch.
 
-### For Generic HTTP Projects
+Before yielding or changing providers, use [HANDOFF_TEMPLATE.md](HANDOFF_TEMPLATE.md) in the existing authorized project evidence path. Preserve exact source and scope leases; record completed checks and remaining gates. Never hand credentials, customer data or entire chat histories to a free provider. A fallback can draft/reason over approved nonsensitive text while application access is exhausted; it cannot automatically take over protected tooling or ongoing production operations.
 
-```bash
-# Replace your endpoint with router
-curl -X POST https://free-token-router.up.railway.app/v1/messages \
-  -H "Authorization: Bearer $YOUR_API_KEY" \
-  ...
-```
+## Source evidence checked 2026-10-17
 
----
+- [Groq rate limits](https://console.groq.com/docs/rate-limits): finite organization/model RPM/RPD/TPM/TPD, account console controls actual limits.
+- [Groq data policy](https://console.groq.com/docs/your-data): review retention/exceptions and ZDR before sensitive use.
+- [OpenRouter free model](https://openrouter.ai/openai/gpt-oss-20b:free): zero token price and Apache 2.0 model listing, not proof of active endpoint capacity.
+- [OpenRouter exact endpoints](https://openrouter.ai/api/v1/models/openai/gpt-oss-20b:free/endpoints): returned `endpoints:[]` in the public read; optional route remains unqualified.
+- [OpenRouter provider routing](https://openrouter.ai/docs/guides/routing/provider-selection): exact provider restriction, disabled fallbacks and price caps.
+- [Cohere pricing](https://cohere.com/pricing): trial keys are not for production/commercial usage.
 
-## 📊 Monitoring
-
-### Check Usage Distribution
-
-```bash
-curl https://free-token-router.up.railway.app/health | jq
-```
-
-Output:
-
-```json
-{
-  "status": "healthy",
-  "available_providers": ["claude", "openai", "cohere"],
-  "usage_stats": {
-    "claude": 245,
-    "openai": 198,
-    "cohere": 167
-  }
-}
-```
-
-### Set Up Alerts
-
-Monitor `/health` endpoint every 5 minutes. Alert if:
-- Status != "healthy"
-- Available providers < 1
-
----
-
-## 🚨 Troubleshooting
-
-### "No providers available"
-
-**Cause:** No API keys configured  
-**Fix:** Add at least one API key to Railway environment
-
-### "Provider returned error"
-
-**Cause:** API key invalid or rate limited  
-**Fix:** Router automatically tries next provider; check logs if all fail
-
-### Slow responses
-
-**Cause:** All providers processing requests  
-**Fix:** Add more API keys or reduce request volume
-
-### "Invalid model name"
-
-**Cause:** Model not supported by routed provider  
-**Fix:** Check `/v1/models` for available models
-
----
-
-## 🆚 Comparison
-
-| Feature | Your Old Approach | Free Token Router |
-|---------|------------------|------------------|
-| Token limit | Limited by 1 provider | Combined across 3+ |
-| Setup time | 5 min per project | 2 min once |
-| Cost | $0-20/month | **$0/month** |
-| Failover | Manual | Automatic |
-| Load balancing | Manual | Automatic |
-| Provider switching | Code changes | Config change |
-
----
-
-## 📝 License
-
-MIT — Use freely, modify as needed
-
----
-
-## 🤝 Support
-
-Issues? Check `/health` endpoint first. If healthy but requests failing, check:
-
-1. API keys valid?
-2. Request format correct?
-3. Model available in `/v1/models`?
-
----
-
-**Deployed endpoint:** (will be assigned by Railway)  
-**Last updated:** 2026-07-20
+Historical implementation and claims remain in git history. The current README supersedes the older integration/deployment guides. Do not revive retired instructions from copied checklists.
