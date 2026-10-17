@@ -3,13 +3,20 @@
 - Verified at (UTC):
 - Controller / sole writer / independent reviewer:
 - Goal and authorized scope:
+- Approved task ID / acceptance criterion version / next-step lock:
+- Sole writer lease owner / expiry or release condition:
+- Allowed file paths, tools and external actions:
 - Exact repository / branch / commit / deployment:
 - Completed behavior and evidence links:
 - Tests already passed at this exact head (do not repeat without reason):
 - Current uncommitted changes and isolated path:
 - Remaining acceptance gates / true blocker:
-- Next single safe action:
+- Action journal: completed action receipts / in-flight UNKNOWN actions:
+- Next single safe action (reconcile UNKNOWN effects before any retry):
 - Explicit standdowns / prohibited providers / protected scopes:
 - Actual quota observation and reset time, or UNKNOWN:
+- Reserved recovery margin / bounded retry count / Retry-After:
+- Qualified input data class and exact main + auxiliary model routes:
+- Storage/runtime/source admission evidence (configuration is not containment):
 - Fallback status: configured / text inference verified / client integration verified (separate):
 - Do not include keys, access tokens, customer content or raw chat history.
