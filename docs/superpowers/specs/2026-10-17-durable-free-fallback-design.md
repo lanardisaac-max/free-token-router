@@ -15,6 +15,7 @@ The existing router candidate is text-only Groq/optional OpenRouter code. Its 43
 - Claude/Claude Code/Anthropic remain prohibited; Antigravity remains retired. Model provenance must be explicit, including gateway upstreams and background title/small/review/subagent models. Unknown identity is not approval.
 - Existing source, build, transport and effective-tool isolation NO-GO remains binding. Enabled-provider metadata, model picker entries, tool lists, binary version strings or a hash alone cannot certify complete effective availability or containment. Do not launch a client, local inference server or infrastructure to work around that gate.
 - Native policy requires qualified F:-backed model files, caches, temp, development state and artifacts. No C:/D: installation/test/download workaround. D: remains Command Center exclusive. Read-only inventory is permitted; the existing storage coordinator is the sole storage executor.
+- The owner's 2026-10-17 instruction, "You are authorized to use F: for storage", approves that destination. It does not establish filesystem health, verified recovery or runtime admission, and does not authorize formatting, destructive repair or a duplicate storage executor.
 - No new credits, auto-reload, paid fallback, billing upgrade, driver update, database action, production release, broad project integration or protected action is implied. Existing normal authentication must be used; never extract/reuse an unrelated session token or service credential.
 - Apply the strict sequential gate within this task. Supporting investigation and review stay on this same task; runtime execution remains locked until its actual dependencies qualify.
 
@@ -33,7 +34,17 @@ The parent freshly read the native executor-retirement directive, global Codex A
 | Desktop settings/service metadata | JSON readable; top-level provider/model/small_model properties absent. Service configuration contains a credential-named property; no value was output or reused. Provider eligibility stays UNKNOWN. |
 | Hardware | Prior same-session read: approximately64GB RAM, i3-12100, GTX1650/4GB, NVIDIA457.51. No inference benchmark. Current Ollama NVIDIA requirement is550+; do not assume GPU acceleration. |
 
-The same-task storage helper found no qualifying coordinator receipt in one bounded retained-history read. Its worker-retained Oct17 20:49:21Z source reported F: Dirty; that sample was not independently parent-read back and is not a fresh filesystem assessment. No verified final-clean repair, exact volume identity, independently recoverable backup or model/cache/temp redirect receipt was established. F: therefore remains UNQUALIFIED for admission; free capacity does not override integrity. Do not repeat a broad assessment or start another repair/copy process.
+The same-task storage helper's retained Oct17 20:49:21Z report of F: Dirty remains historical. A subsequent parent read-only native check at **2026-10-17T21:46:36.7667381Z** directly established the following; it supersedes the earlier uncertainty about current volume identity and health, without certifying recovery.
+
+| Direct storage observation | Result |
+| --- | --- |
+| F: volume | Backup Plus; exFAT; unique ID `\\?\Volume{95b85226-334d-42fc-a9fc-f7b2f0dd4630}\` |
+| Filesystem health | Get-Volume: Warning / Full Repair Needed; fsutil: Volume - F: is Dirty |
+| Capacity snapshot | 4,000,491,503,616 bytes total; 1,700,333,879,296 bytes free; not a peak-space/reserve qualification |
+| Existing process names/IDs | Robocopy 32892 and 43364; no chkdsk in this bounded query. This does not establish copy success, verified backup or absence of other coordination. |
+| Observation method | Get-Volume metadata, bounded Win32_Process names/IDs/creation times and fsutil dirty query; command exit0; no repair, copy, installation or inference was started |
+
+No qualifying final-clean coordinator receipt, independently recoverable backup or model/cache/temp redirect receipt was established. F: is destination-authorized but remains **UNQUALIFIED** for admission because current filesystem integrity fails the gate. Do not write model files to it, repeat a broad assessment, stop existing copies or start another repair/copy process. The existing storage coordinator retains execution ownership.
 
 ## Qualified candidate selection
 
@@ -50,7 +61,7 @@ Version DFF-ADMISSION-20261017-v1. These eight criteria define the first qualifi
 
 | ID | Required proof | Current disposition |
 | --- | --- | --- |
-| DFF01 | Existing coordinator admits exact F: volume, clean filesystem, verified recovery, peak capacity plus reserve, permissions/link behavior and all model/cache/temp paths | BLOCKED: qualifying receipt missing |
+| DFF01 | Existing coordinator admits exact F: volume, clean filesystem, verified recovery, peak capacity plus reserve, permissions/link behavior and all model/cache/temp paths | BLOCKED: destination authorized; direct21:46:36Z check Dirty / Full Repair Needed; qualifying recovery, clean-filesystem and path receipts missing |
 | DFF02 | Exact client, inference runtime, dependencies/plugins, source/build hashes and effective tool/network/credential boundaries bound to authorized scope; independently reviewed | UNVERIFIED: file identity is only partial metadata |
 | DFF03 | Each activated cloud/local model has exact provenance/license, correct data class, usable normal authentication, renewable-free/zero-paid entitlement or local artifact proof | UNVERIFIED: no account/artifact qualified |
 | DFF04 | Real admitted client completes a synthetic approved read -> edit -> local test -> result cycle; main and auxiliary routes remain permitted | NOT RUN: no runtime admission |
